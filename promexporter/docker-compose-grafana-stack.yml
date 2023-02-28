@@ -1,0 +1,63 @@
+version: '3'
+
+networks:
+  nano-monitor:
+    driver: bridge
+    name: nano-monitor
+
+services:
+
+  nano_pushgateway:
+    image: prom/pushgateway:latest
+    container_name: nano_pushgateway
+    restart: unless-stopped
+    expose:
+      - 9091
+    networks:
+      - nano-monitor
+    ports:
+      - 42091:9091
+
+  nano_prometheus:
+    image: prom/prometheus:latest
+    container_name: nano_prometheus
+    restart: unless-stopped
+    volumes:
+      - ../promexporter/prometheus.yml:/etc/prometheus/prometheus.yml
+      - nano_prometheus_data:/prometheus
+    # tmpfs: /prometheus:uid=99
+    command:
+      - '--web.enable-admin-api'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    expose:
+      - 9090
+    networks:
+      - nano-monitor
+    ports:
+      - 42090:9090
+
+  nano_grafana:
+    # 8.3.3 - terrible dashboard graph flashing
+    image: grafana/grafana:8.3.2
+    container_name: nano_grafana
+    restart: unless-stopped
+    user: "472"
+    depends_on:
+      - nano_prometheus
+    ports:
+      - 42005:3000
+    volumes:
+      - nano_grafana_data:/var/lib/grafana
+      - ../promexporter/grafana/provisioning/:/etc/grafana/provisioning/
+      # env_file:
+      # - ./grafana/config.monitoring
+    networks:
+      - nano-monitor
+
+volumes:
+  nano_grafana_data: { name: nano_grafana_data}
+  nano_prometheus_data: { name: nano_prometheus_data }

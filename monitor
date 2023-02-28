@@ -1,0 +1,58 @@
+#!./venv_python/bin/python
+import argparse
+import datetime
+from subprocess import run, PIPE
+from src.yaml_editor import PromComposer
+
+# 2023-02-28 gr0vity
+# Monitor your nano nodes with a local dockerized grafana dashboard
+# Usage : 
+# ./monitor setup                           # Creates the dashboard at http://localhost:42005
+# ./monitor start --node {NODE_IP:RPC_PORT} # Creates the prom-exporter instance for that node
+# ./monitor stop                            # Stop all prom-exporters (takes optional --node )
+# ./monitor destroy                         # runs docker-compose down
+
+
+parser = argparse.ArgumentParser(description='Monitor script')
+
+parser.add_argument('command',
+        help='setup, start, stop, down/destroy, status')
+parser.add_argument('--node', metavar='HOST:PORT', action='append', help='Node addresses')
+parser.add_argument('--runid', default=f'run_{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}', help='Run ID')
+
+args = parser.parse_args()
+prom_composer = PromComposer()
+
+
+def run_shell_command(command):    
+    shell_reponse = run(command, shell=True, encoding="utf-8", stderr=PIPE)
+    status = shell_reponse.returncode
+    
+           
+    if status != 0:
+        stderr = shell_reponse.stderr.replace("\n", "")
+        print(stderr)
+        raise Exception(f"{command} failed with status:{status}")
+
+
+if args.command == "setup":
+    prom_composer.grafana_stack()
+    run_shell_command("docker-compose -f ./output/docker-compose-grafana-stack1.yml up -d ")
+
+if args.command == "start" and args.node:
+    prom_composer.prom_exporters(args.node)
+    run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml up -d ")
+
+if args.command == "stop" and args.node:
+    for node in args.node :
+         run_shell_command(f'docker stop {node.replace(":", "_")}')
+   
+elif args.command == "stop":
+    run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml stop ")
+
+
+if args.command == "down" or args.command == "destroy":
+   run_shell_command("docker-compose -f ./output/docker-compose-grafana-stack1.yml stop ")
+   run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml stop ")
+   run_shell_command("docker-compose -f ./output/docker-compose-grafana-stack1.yml down ")
+   run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml down ")
