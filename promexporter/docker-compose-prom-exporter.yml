@@ -5,7 +5,8 @@ services:
   default_exporter:
     build:
       context: ../
-      dockerfile: ./promexporter/Dockerfile    
+      dockerfile: ./promexporter/Dockerfile
+    profiles: [prom-exporter]
     container_name: ${node_name}_exporter
     restart: unless-stopped
     environment:

@@ -37,18 +37,18 @@ def run_shell_command(command):
 
 if args.command == "setup":
     prom_composer.grafana_stack()
-    run_shell_command("docker-compose -f ./output/docker-compose-grafana-stack1.yml up -d ")
+    run_shell_command("docker-compose -f ./output/docker-compose-grafana-stack1.yml --profile grafana-stack up -d ")
 
 if args.command == "start" and args.node:
     prom_composer.prom_exporters(args.node)
-    run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml up -d ")
+    run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml --profile prom-exporter up -d ")
 
 if args.command == "stop" and args.node:
     for node in args.node :
          run_shell_command(f'docker stop {node.replace(":", "_")}')
    
 elif args.command == "stop":
-    run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml stop ")
+    run_shell_command("docker-compose -f ./output/docker-compose-prom-exporter1.yml --profile prom-exporter stop")
 
 
 if args.command == "down" or args.command == "destroy":
