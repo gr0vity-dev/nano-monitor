@@ -20,7 +20,7 @@ def str2bool(v):
 class PromComposer:
 
     compose_dir = "output"
-    config_dict = {"prom_gateway" : "nano_pushgateway:9091"}
+    config_dict = {"prom_gateway" : "localhost:42091"}
     compose_dict = {"services" : {},
                     "volumes" : {},
                     "networks" : {}}
@@ -76,9 +76,7 @@ class PromComposer:
             #This only works for dockerized nodes
             #self.compose_dict["services"][container_name]["pid"] = f'service:{node_name}'
         
-        for network in nano_prom_compose["networks"]:
-            self.compose_dict["networks"][network] = nano_prom_compose[
-                "networks"][network]
+        
         self.write_docker_compose(f"./{self.compose_dir}/docker-compose-prom-exporter1.yml")
     
     def write_docker_compose(self, path) -> None:
