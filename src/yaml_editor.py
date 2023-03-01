@@ -71,7 +71,7 @@ class PromComposer:
             self.compose_dict["services"][container_name][
                 "container_name"] = container_name            
 
-            self.compose_dict["services"][container_name]["command"] = f'--rpchost {host_ip} --rpc_port {node_rpc_port} --push_gateway {prom_gateway} --hostname {node_name} --runid {prom_runid} --interval 2'
+            self.compose_dict["services"][container_name]["command"] = f'--host {host_ip} --port {node_rpc_port} --push_gateway {prom_gateway} --hostname {node_name} --runid {prom_runid} --interval 2'
 
             #This only works for dockerized nodes
             #self.compose_dict["services"][container_name]["pid"] = f'service:{node_name}'
