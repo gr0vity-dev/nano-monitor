@@ -5,7 +5,14 @@ monitor all the stats of your [nano-node](https://github.com/nanocurrency/nano-n
 
 Based on [pwojcikdev/nano-prom-grafana-stack](https://github.com/pwojcikdev/nano-prom-grafana-stack)
 
-## How to use ?
+## Prerequisites :
+- python3
+- docker
+- docker-compose
+
+`pip3 install pyyaml`
+
+## How to run :
 
 - Setup and start grafana dashboard, prometheus and the pushgateway <br>
 `./monitor setup` 
